@@ -7,7 +7,6 @@ import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
 
 const Workspace = ({
-  setIsDownloading,
   isDownloading,
   title,
   showTitles,
@@ -32,6 +31,7 @@ const Workspace = ({
   items,
   draggingItem,
   hoverItem,
+  setIsDownloading,
   setDraggingItem,
   setHoverItem,
   onDrop,
@@ -39,7 +39,6 @@ const Workspace = ({
   dispatch,
   hasData,
 }: {
-  setIsDownloading: Dispatch<SetStateAction<boolean>>;
   isDownloading: boolean;
   title: string;
   showTitles: boolean;
@@ -68,6 +67,7 @@ const Workspace = ({
     origin: string;
   };
   hoverItem: number;
+  setIsDownloading: Dispatch<SetStateAction<boolean>>;
   setDraggingItem: (value: {
     item: Item;
     index: number;

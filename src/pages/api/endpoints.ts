@@ -4,7 +4,7 @@ import axios from "axios";
 async function getIGDBToken() {
   await axios
     .post(
-      `https://id.twitch.tv/oauth2/token?client_id=${process.env.IGDB_ID}&client_secret=${process.env.SECRET}&grant_type=client_credentials`
+      `https://id.twitch.tv/oauth2/token?client_id=${process.env.IGDB_ID}&client_secret=${process.env.IGDB_SECRET}&grant_type=client_credentials`
     )
     .then((resp) => {
       console.log("Access token: " + resp.data.access_token);
