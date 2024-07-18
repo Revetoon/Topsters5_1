@@ -6,22 +6,19 @@ const AboutTab = () => {
     <div className={`animate-opacity ${styles["input-group"]}`}>
       <div className={styles.about}>
         <p>
-          Based on <a href="https://topsters.org">Topsters 3</a>. There are some
-          few extra features that I wanted to have, and that&apos;s why I
-          implemented my own version :)
-        </p>
-        <p>
-          Topsters 1 and 2 are not around anymore, but Topsters 3 is still up
-          and running and has been for a couple or years already. Give it a try
-          if you want!
-        </p>
-        <p>
-          Also, if you feel like you can improve upon this version and pass on
-          the legacy, you can fork the{" "}
+          Forked from{" "}
           <a target="_blank" href="https://github.com/roselcost/topsters">
-            GitHub repo
+            Topsters 4
           </a>{" "}
-          or go ahead and make your own Topsters 5 from scratch!
+          which was created by roselcost.
+        </p>
+        <p>This project is just for fun.</p>
+        <p>
+          Some features I have added/finished:
+          <ul>
+            <li>- Import from last.fm</li>
+            <li>- More customization options</li>
+          </ul>
         </p>
         <h2>Data sources</h2>
         <br></br>

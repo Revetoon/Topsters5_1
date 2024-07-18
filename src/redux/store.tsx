@@ -157,43 +157,62 @@ export const stateSlice = createSlice({
       state.items[value.payload] = { title: "", cover: "" };
     },
     setPreset: (state, value: { payload: string }) => {
-      if (value.payload === "Topsters") {
-        state.rows = 5;
-        state.columns = 5;
-        state.showTitles = true;
-        state.backgroundType = BackgroundType.color;
-        state.backgroundColor1 = "#000000";
-        state.backgroundOpacity = 16;
-        state.gap = 20;
-        state.borderSize = 0;
-        state.borderRadius = 0;
-        state.isCircle = false;
-        state.showNumbers = true;
-        state.showShadows = false;
-        state.font = Font.monospace;
-        state.fontSize = 10;
-        state.textColor = "#ffffff";
-        state.titlesPosition = Position.side;
-      }
-      if (value.payload === "Museum") {
-        state.rows = 3;
-        state.columns = 8;
-        state.showTitles = true;
-        state.backgroundType = BackgroundType.gradient;
-        state.gradientDirection = Direction.topRight;
-        state.backgroundColor1 = "#000000";
-        state.backgroundColor2 = "#2c313a";
-        state.backgroundOpacity = 16;
-        state.gap = 20;
-        state.borderSize = 0;
-        state.borderRadius = 8;
-        state.isCircle = false;
-        state.showNumbers = true;
-        state.showShadows = true;
-        state.font = Font.lato;
-        state.fontSize = 10;
-        state.textColor = "#ffffff";
-        state.titlesPosition = Position.cover;
+      switch (value.payload) {
+        case "Topsters":
+          state.rows = 5;
+          state.columns = 5;
+          state.showTitles = true;
+          state.backgroundType = BackgroundType.color;
+          state.backgroundColor1 = "#000000";
+          state.backgroundOpacity = 16;
+          state.gap = 20;
+          state.borderSize = 0;
+          state.borderRadius = 0;
+          state.isCircle = false;
+          state.showNumbers = true;
+          state.showShadows = false;
+          state.font = Font.monospace;
+          state.fontSize = 10;
+          state.textColor = "#ffffff";
+          state.titlesPosition = Position.side;
+          break;
+        case "Museum":
+          state.rows = 3;
+          state.columns = 8;
+          state.showTitles = true;
+          state.backgroundType = BackgroundType.gradient;
+          state.gradientDirection = Direction.topRight;
+          state.backgroundColor1 = "#000000";
+          state.backgroundColor2 = "#2c313a";
+          state.backgroundOpacity = 16;
+          state.gap = 20;
+          state.borderSize = 0;
+          state.borderRadius = 8;
+          state.isCircle = false;
+          state.showNumbers = true;
+          state.showShadows = true;
+          state.font = Font.lato;
+          state.fontSize = 10;
+          state.textColor = "#ffffff";
+          state.titlesPosition = Position.cover;
+          break;
+        case "Mega List":
+          state.rows = 10;
+          state.columns = 10;
+          state.showTitles = true;
+          state.backgroundType = BackgroundType.color;
+          state.backgroundColor1 = "#000000";
+          state.backgroundOpacity = 16;
+          state.gap = 10;
+          state.borderSize = 0;
+          state.borderRadius = 0;
+          state.isCircle = false;
+          state.showNumbers = true;
+          state.showShadows = false;
+          state.font = Font.monospace;
+          state.fontSize = 8;
+          state.textColor = "#ffffff";
+          state.titlesPosition = Position.side;
       }
     },
     importState: (state, value: { payload: any }) => {

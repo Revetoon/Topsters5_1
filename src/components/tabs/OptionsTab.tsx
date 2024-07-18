@@ -152,6 +152,7 @@ const OptionsTab = ({
               options={[
                 { id: "Topsters", name: "Topsters" },
                 { id: "Museum", name: "Museum" },
+                { id: "Mega List", name: "Mega List" },
               ]}
               selected={[]}
               onChange={(value) => dispatch(setPreset(value))}
