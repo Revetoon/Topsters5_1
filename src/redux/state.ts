@@ -59,6 +59,16 @@ export enum Category {
   pictures = "pictures",
 }
 
+// overall | 7day | 1month | 3month | 6month | 12month
+export enum Period {
+  overall = "overall",
+  week = "7day",
+  month = "1month",
+  threeMonths = "3month",
+  sixMonths = "6month",
+  year = "12month",
+}
+
 export interface Item {
   title: string;
   cover: string;

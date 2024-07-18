@@ -6,11 +6,13 @@ import {
   Direction,
   Font,
   Item,
+  Period,
   Position,
   State,
 } from "@/redux/state";
 import {
   addItem,
+  addMultipleItems,
   exportState,
   importState,
   removeItem,
@@ -44,6 +46,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Button from "../components/Button";
+import Workspace from "@/components/Workspace";
 
 export default function Home() {
   const hasData = (item: Item) => {
@@ -95,17 +98,33 @@ export default function Home() {
     }
   };
 
-  const importItems = () => {};
+  const importItems = () => {
+    if (!!lastfmUser) {
+      setIsSearching(true);
+      axios
+        .get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints?category=${category}&name=${lastfmUser}&period=${period}`
+        )
+        .then((response) => {
+          dispatch(addMultipleItems({ items: response.data }));
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          setIsSearching(false);
+        });
+    }
+  };
 
   const searchItems = () => {
     if (!!search) {
       setIsSearching(true);
       axios
         .get(
-          `https://topsters4.vercel.app/api/endpoints?category=${category}&name=${search}`
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints?category=${category}&name=${search}`
         )
         .then((response) => {
-          console.log(response.data[0].cover);
           setSearchedItems(response.data);
         })
         .catch((error) => {
@@ -152,9 +171,10 @@ export default function Home() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [itemForm, setItemForm] = useState({ title: "", url: "" });
-  const [importForm, setImportForm] = useState([]);
-  const [category, setCategory] = useState(Category.games);
+  const [category, setCategory] = useState(Category.music);
+  const [period, setPeriod] = useState(Period.overall);
   const [search, setSearch] = useState("");
+  const [lastfmUser, setLastfmUser] = useState("");
   const [tab, setTab] = useState("add");
   const dispatch = useDispatch();
   const title = useSelector((state: State) => state.title);
@@ -191,8 +211,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Topsters 4</title>
-        <meta name="description" content="Topsters 4" />
+        <title>Zopsters</title>
+        <meta name="description" content="Zopsters" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.png" />
       </Head>
@@ -203,7 +223,7 @@ export default function Home() {
               className={`${styles["section-container"]} ${styles["app-header"]}`}
             >
               <div className={`${styles.section} ${styles.header}`}>
-                <h1>Topsters 4</h1>
+                <h1>Zopsters</h1>
               </div>
             </div>
             <div className={`${styles["section-container"]} ${styles.toolbar}`}>
@@ -269,15 +289,21 @@ export default function Home() {
                           label="categories"
                           options={[
                             {
-                              id: Category.games,
-                              name: Category.games,
-                              icon: "/icons/controller.svg",
-                              hideLabel: true,
-                            },
-                            {
                               id: Category.music,
                               name: Category.music,
                               icon: "/icons/music.svg",
+                              hideLabel: true,
+                            },
+                            {
+                              id: Category.lastfm,
+                              name: Category.lastfm,
+                              icon: "/icons/lastfm.svg",
+                              hideLabel: true,
+                            },
+                            {
+                              id: Category.games,
+                              name: Category.games,
+                              icon: "/icons/controller.svg",
                               hideLabel: true,
                             },
                             {
@@ -298,12 +324,6 @@ export default function Home() {
                               icon: "/icons/book.svg",
                               hideLabel: true,
                             },
-                            // {
-                            //   id: Category.lastfm,
-                            //   name: Category.lastfm,
-                            //   icon: "/icons/lastfm.svg",
-                            //   hideLabel: true,
-                            // },
                             // {
                             //   id: Category.pictures,
                             //   name: Category.pictures,
@@ -421,6 +441,7 @@ export default function Home() {
                             </label>
                             <div className={styles.values}>
                               <input
+                                onChange={(e) => setLastfmUser(e.target.value)}
                                 className={styles.value}
                                 type="text"
                                 placeholder={`Username`}
@@ -442,17 +463,15 @@ export default function Home() {
                             <div className={styles.values}>
                               <Selector
                                 options={[
-                                  { id: "overall", name: "Overall" },
-                                  { id: "week", name: "Week" },
-                                  { id: "month", name: "Month" },
-                                  { id: "three", name: "3 months" },
-                                  { id: "six", name: "6 months" },
-                                  { id: "year", name: "Year" },
+                                  { id: Period.overall, name: "Overall" },
+                                  { id: Period.week, name: "Week" },
+                                  { id: Period.month, name: "Month" },
+                                  { id: Period.threeMonths, name: "3 months" },
+                                  { id: Period.sixMonths, name: "6 months" },
+                                  { id: Period.year, name: "Year" },
                                 ]}
-                                selected={["week"]}
-                                onChange={function (id: any): void | {} {
-                                  throw new Error("Function not implemented.");
-                                }}
+                                selected={[period]}
+                                onChange={(value) => setPeriod(value)}
                               ></Selector>
                             </div>
                           </div>
@@ -1186,323 +1205,38 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className={styles.workspace}>
-            <div
-              className={`${styles["workspace-container"]} ${styles["section-container"]}`}
-            >
-              <div
-                style={{ justifyContent: "space-between" }}
-                className={styles["section-title"]}
-              >
-                <div className={styles.collection}>
-                  <div
-                    style={{ cursor: "unset" }}
-                    className={`${styles.tab} ${styles["selected-tab"]}`}
-                  >
-                    <h2>{!!title ? title : "Untitled"}</h2>
-                  </div>
-                </div>
-                <div>
-                  <div
-                    onClick={() => {
-                      setIsDownloading(true);
-                      downloadImage(title).then(() => setIsDownloading(false));
-                    }}
-                    className={styles.tab}
-                  >
-                    <h2>
-                      Download
-                      <Image
-                        width={10}
-                        height={10}
-                        className={`${styles.icon} ${
-                          isDownloading && styles.loading
-                        }`}
-                        src="/icons/download.svg"
-                        alt="Download"
-                      ></Image>
-                    </h2>
-                  </div>
-                </div>
-              </div>
-              <div
-                className={`${styles["workspace-content"]} ${styles.section} `}
-              >
-                <div className={styles.checkerboard}>
-                  <div
-                    id="imageContainer"
-                    className={styles.content}
-                    style={{
-                      padding: gap + "px",
-                      backgroundColor:
-                        backgroundType === BackgroundType.color
-                          ? backgroundColor1 +
-                            Math.max(backgroundOpacity * 16 - 1, 0)
-                              .toString(16)
-                              .padStart(2, "0")
-                          : "unset",
-                      backgroundImage:
-                        backgroundType === BackgroundType.gradient
-                          ? `linear-gradient(to ${gradientDirection}, ${
-                              backgroundColor1 +
-                              Math.max(backgroundOpacity * 16 - 1, 0)
-                                .toString(16)
-                                .padStart(2, "0")
-                            }, ${
-                              backgroundColor2 +
-                              Math.max(backgroundOpacity * 16 - 1, 0)
-                                .toString(16)
-                                .padStart(2, "0")
-                            })`
-                          : backgroundType === BackgroundType.radialGradient
-                          ? `radial-gradient(at ${gradientDirection}, ${
-                              backgroundColor1 +
-                              Math.max(backgroundOpacity * 16 - 1, 0)
-                                .toString(16)
-                                .padStart(2, "0")
-                            }, ${
-                              backgroundColor2 +
-                              Math.max(backgroundOpacity * 16 - 1, 0)
-                                .toString(16)
-                                .padStart(2, "0")
-                            })`
-                          : "unset",
-                    }}
-                  >
-                    {title && (
-                      <div
-                        className={styles.title}
-                        style={{
-                          textShadow: `${
-                            showShadows ? "black 1px 1px 1px" : ""
-                          }`,
-                          fontFamily: font,
-                          color: textColor,
-                          gap: gap,
-                        }}
-                      >
-                        {title}
-                      </div>
-                    )}
-                    <div className={styles["workspace-covers-container"]}>
-                      <div
-                        style={{
-                          gridTemplateColumns: `repeat(${columns}, 1fr)`,
-                          gap: gap,
-                          padding: gap,
-                        }}
-                        className={styles["workspace-covers"]}
-                      >
-                        {items
-                          .filter((_item, i) => i < rows * columns)
-                          .map((item, i) => (
-                            <div
-                              key={i}
-                              className={`${styles["workspace-cover"]} ${
-                                [draggingItem.index, hoverItem].includes(i) &&
-                                styles.dragging
-                              }`}
-                              style={{
-                                minHeight: "100px",
-                                height: `${
-                                  titlesPosition === Position.side
-                                    ? "100px"
-                                    : "unset"
-                                }`,
-                                borderRadius: borderRadius,
-                              }}
-                              onDrop={() => onDrop(i)}
-                              onDragOver={(e) => {
-                                e.preventDefault();
-                                setHoverItem(i);
-                              }}
-                              draggable={hasData(item)}
-                              onDragStart={() => {
-                                setDraggingItem({
-                                  item: { ...item },
-                                  index: i,
-                                  origin: "collection",
-                                });
-                              }}
-                              onClick={(e: any) => {
-                                if (e?.target?.id !== "remove") {
-                                  if (draggingItem.index === -1) {
-                                    if (hasData(item)) {
-                                      setDraggingItem({
-                                        item: { ...item },
-                                        index: i,
-                                        origin: "collection",
-                                      });
-                                    }
-                                  } else {
-                                    onDrop(i);
-                                  }
-                                }
-                              }}
-                              onDragEnd={() => resetDrag()}
-                            >
-                              {!hasData(item) && (
-                                <div
-                                  style={{
-                                    backgroundColor: `#ccc`,
-                                    height: "100px",
-                                    borderRadius: isCircle
-                                      ? "100%"
-                                      : borderRadius,
-                                    boxShadow: `${
-                                      showShadows
-                                        ? "black 3px 3px 10px 0px"
-                                        : "unset"
-                                    }`,
-                                    border: `${borderSize}px solid ${borderColor} `,
-                                  }}
-                                  className={`${styles.cover} ${styles["no-items"]}`}
-                                >
-                                  <span style={{ color: "black" }}>
-                                    {i + 1}
-                                  </span>
-                                </div>
-                              )}
-                              {hasData(item) && draggingItem.index === -1 && (
-                                <>
-                                  <div
-                                    id="remove"
-                                    onClick={() => {
-                                      dispatch(removeItem(i));
-                                      resetDrag();
-                                    }}
-                                    className={styles.delete}
-                                  >
-                                    <img
-                                      id="remove"
-                                      className={styles.icon}
-                                      src="/icons/remove.svg"
-                                    ></img>
-                                  </div>
-                                  <div
-                                    onClick={(e: any) => {
-                                      if (e?.target?.id !== "remove") {
-                                        if (draggingItem.index === -1) {
-                                          if (hasData(item)) {
-                                            setDraggingItem({
-                                              item: { ...item },
-                                              index: i,
-                                              origin: "collection",
-                                            });
-                                          }
-                                        } else {
-                                          onDrop(i);
-                                        }
-                                      }
-                                    }}
-                                    className={styles.move}
-                                  >
-                                    <img
-                                      className={styles.icon}
-                                      src="/icons/drag.svg"
-                                    ></img>
-                                  </div>
-                                </>
-                              )}
-                              {hasData(item) && (
-                                <>
-                                  <img
-                                    className={styles.cover}
-                                    style={{
-                                      borderRadius: isCircle
-                                        ? "100%"
-                                        : borderRadius,
-                                      height: `${isCircle ? "100px" : "unset"}`,
-                                      maxHeight: "100px",
-                                      maxWidth: "100px",
-                                      border: `${borderSize}px solid ${borderColor}`,
-                                      boxShadow: `${
-                                        showShadows
-                                          ? "black 3px 3px 10px 0px"
-                                          : "unset"
-                                      }`,
-                                    }}
-                                    src={"https:" + item.cover}
-                                    alt="Cover"
-                                    width={isCircle ? 100 : "unset"}
-                                  ></img>
-                                  {showTitles &&
-                                    titlesPosition === Position.cover && (
-                                      <div
-                                        className={styles["cover-titles"]}
-                                        style={{
-                                          fontFamily: font,
-                                          color: textColor,
-                                          textShadow: `${
-                                            showShadows
-                                              ? "black 1px 1px 1px"
-                                              : ""
-                                          }`,
-                                        }}
-                                      >
-                                        <div>
-                                          {`${
-                                            showNumbers ? `${i + 1}. ` : ""
-                                          }` + item.title}
-                                        </div>
-                                      </div>
-                                    )}
-                                </>
-                              )}
-                            </div>
-                          ))}
-                      </div>
-                      {showTitles && titlesPosition === Position.side && (
-                        <div
-                          className={styles["side-titles"]}
-                          style={{
-                            fontFamily: font,
-                            color: textColor,
-                            textShadow: `${
-                              showShadows ? "black 1px 1px 1px" : ""
-                            }`,
-                            padding: gap,
-                          }}
-                        >
-                          {titlesPosition === Position.side &&
-                            !items.some((item) => hasData(item)) && (
-                              <div className={styles["no-items"]}>
-                                <Image
-                                  width={100}
-                                  height={100}
-                                  className={`${styles.icon} ${styles["big-icon"]}`}
-                                  src={"/icons/picture.svg"}
-                                  alt={"No items"}
-                                ></Image>
-
-                                <span>Nothing here... yet!</span>
-                              </div>
-                            )}
-                          {titlesPosition === Position.side &&
-                            items
-                              .filter((_item, i) => i < rows * columns)
-                              .map((item, i) => {
-                                const number = showNumbers ? `${i + 1}. ` : "";
-                                const br =
-                                  (i + 1) % columns === 0 ? <br></br> : "";
-                                const res = hasData(item) ? (
-                                  <div key={i}>
-                                    <div>{number + item.title}</div>
-                                    {br}
-                                  </div>
-                                ) : (
-                                  <div key={i}>{br}</div>
-                                );
-                                return res;
-                              })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Workspace
+            items={items}
+            draggingItem={draggingItem}
+            hoverItem={hoverItem}
+            onDrop={onDrop}
+            setHoverItem={setHoverItem}
+            setDraggingItem={setDraggingItem}
+            title={title}
+            setIsDownloading={setIsDownloading}
+            isDownloading={isDownloading}
+            showTitles={showTitles}
+            rows={rows}
+            columns={columns}
+            backgroundType={backgroundType}
+            backgroundColor1={backgroundColor1}
+            backgroundColor2={backgroundColor2}
+            backgroundOpacity={backgroundOpacity}
+            gradientDirection={gradientDirection}
+            gap={gap}
+            borderColor={borderColor}
+            isCircle={isCircle}
+            borderSize={borderSize}
+            borderRadius={borderRadius}
+            showNumbers={showNumbers}
+            showShadows={showShadows}
+            font={font}
+            textColor={textColor}
+            titlesPosition={titlesPosition}
+            resetDrag={resetDrag}
+            dispatch={dispatch}
+            hasData={hasData}
+          />
         </div>
       </main>
     </>

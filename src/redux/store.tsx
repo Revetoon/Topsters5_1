@@ -130,6 +130,9 @@ export const stateSlice = createSlice({
         state.items[firstIndex] = value.payload.item;
       } else state.items[value.payload.destinationIndex] = value.payload.item;
     },
+    addMultipleItems: (state, value: { payload: { items: Item[] } }) => {
+      state.items = value.payload.items;
+    },
     swapItem: (
       state,
       value: {
@@ -237,6 +240,7 @@ export const {
   setTextColor,
   setTitlesPosition,
   addItem,
+  addMultipleItems,
   swapItem,
   removeItem,
   setPreset,

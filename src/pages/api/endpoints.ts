@@ -16,7 +16,7 @@ async function getIGDBToken() {
 }
 
 export default async function handler(
-  req: { query: { category: string; name: string } },
+  req: { query: { category: string; name: string; period?: string } },
   res: any
 ) {
   // await getIGDBToken();
@@ -28,7 +28,11 @@ export default async function handler(
       await musicRequest(req.query.name, res);
       break;
     case Category.lastfm:
-      await lastfmRequest(req.query.name, res);
+      await lastfmRequest(
+        req.query.name,
+        req.query.period ? req.query.period : "overall",
+        res
+      );
       break;
     case Category.movies:
       await moviesRequest(req.query.name, res);
@@ -99,19 +103,26 @@ async function musicRequest(name: string, res: any) {
     });
 }
 
-async function lastfmRequest(name: string, res: any) {
+// Import from lastfm
+async function lastfmRequest(name: string, period: string, res: any) {
   await axios({
     method: "GET",
-    url: `http://ws.audioscrobbler.com/2.0/?method=album.search&album=${name}&api_key=${process.env.LASTFM_KEY}&format=json`,
+    url: `http://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${name}&api_key=${process.env.LASTFM_KEY}&format=json&period=${period}&limit=100`,
   })
     .then(async (resp) => {
-      const ret = resp.data.results.albummatches.album.map(
-        (album: { artist: string; name: string; image: any }) => {
+      const ret = resp.data.topalbums.album.map(
+        (album: {
+          artist: string | { name: string };
+          name: string;
+          image: any;
+        }) => {
+          const artistName =
+            typeof album.artist === "object" ? album.artist.name : album.artist;
           const cover = album.image
             .find((image: { size: string }) => image.size === "large")
             ["#text"].replace("https:", "");
           return {
-            title: `${album.artist} - ${album.name}`,
+            title: `${artistName} - ${album.name}`,
             cover,
           };
         }
