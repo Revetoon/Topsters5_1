@@ -26,6 +26,7 @@ import {
   setBorderSize,
   setColumns,
   setFont,
+  setFontSize,
   setGap,
   setGradientDirection,
   setIsCircle,
@@ -202,6 +203,7 @@ export default function Home() {
   const showNumbers = useSelector((state: State) => state.showNumbers);
   const showShadows = useSelector((state: State) => state.showShadows);
   const font = useSelector((state: State) => state.font);
+  const fontSize = useSelector((state: State) => state.fontSize);
   const textColor = useSelector((state: State) => state.textColor);
   const titlesPosition = useSelector((state: State) => state.titlesPosition);
   const items = useSelector((state: State) => state.items);
@@ -777,6 +779,28 @@ export default function Home() {
                         </div>
                       </div>
                       <div className={styles.input}>
+                        <label className={styles["input-label"]}>
+                          Font Size
+                        </label>
+                        <div className={styles.values}>
+                          <input
+                            onChange={(value) => {
+                              dispatch(
+                                setFontSize(parseInt(value.target.value))
+                              );
+                            }}
+                            min={6}
+                            max={24}
+                            value={fontSize}
+                            className={styles.value}
+                            type="range"
+                          ></input>
+                          <span className={styles["range-value"]}>
+                            {fontSize}
+                          </span>
+                        </div>
+                      </div>
+                      <div className={styles.input}>
                         <label className={styles["input-label"]}>Color</label>
                         <div className={styles.values}>
                           <input
@@ -1231,6 +1255,7 @@ export default function Home() {
             showNumbers={showNumbers}
             showShadows={showShadows}
             font={font}
+            fontSize={fontSize}
             textColor={textColor}
             titlesPosition={titlesPosition}
             resetDrag={resetDrag}

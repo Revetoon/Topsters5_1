@@ -33,6 +33,7 @@ const copy = (targetState: State, sourceState: State) => {
   targetState.showNumbers = sourceState.showNumbers;
   targetState.showShadows = sourceState.showShadows;
   targetState.font = sourceState.font;
+  targetState.fontSize = sourceState.fontSize;
   targetState.textColor = sourceState.textColor;
   targetState.titlesPosition = sourceState.titlesPosition;
 };
@@ -55,6 +56,7 @@ const initialState: State = {
   showNumbers: false,
   showShadows: false,
   font: Font.monospace,
+  fontSize: 10,
   textColor: "#ffffff",
   titlesPosition: Position.side,
   items: itemArray,
@@ -115,6 +117,9 @@ export const stateSlice = createSlice({
     setFont: (state, value: { payload: Font | string }) => {
       state.font = value.payload;
     },
+    setFontSize: (state, value: { payload: number }) => {
+      state.fontSize = value.payload;
+    },
     setTextColor: (state, value: { payload: string }) => {
       state.textColor = value.payload;
     },
@@ -166,6 +171,7 @@ export const stateSlice = createSlice({
         state.showNumbers = true;
         state.showShadows = false;
         state.font = Font.monospace;
+        state.fontSize = 10;
         state.textColor = "#ffffff";
         state.titlesPosition = Position.side;
       }
@@ -185,6 +191,7 @@ export const stateSlice = createSlice({
         state.showNumbers = true;
         state.showShadows = true;
         state.font = Font.lato;
+        state.fontSize = 10;
         state.textColor = "#ffffff";
         state.titlesPosition = Position.cover;
       }
@@ -237,6 +244,7 @@ export const {
   setShowNumbers,
   setShowShadows,
   setFont,
+  setFontSize,
   setTextColor,
   setTitlesPosition,
   addItem,

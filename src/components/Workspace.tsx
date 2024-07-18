@@ -26,6 +26,7 @@ const Workspace = ({
   showNumbers,
   showShadows,
   font,
+  fontSize,
   textColor,
   titlesPosition,
   items,
@@ -57,6 +58,7 @@ const Workspace = ({
   showNumbers: boolean;
   showShadows: boolean;
   font: Font | string;
+  fontSize: number;
   textColor: string;
   titlesPosition: Position;
   items: Item[];
@@ -310,6 +312,7 @@ const Workspace = ({
                                   className={styles["cover-titles"]}
                                   style={{
                                     fontFamily: font,
+                                    fontSize: fontSize,
                                     color: textColor,
                                     textShadow: `${
                                       showShadows ? "black 1px 1px 1px" : ""
@@ -332,6 +335,7 @@ const Workspace = ({
                     className={styles["side-titles"]}
                     style={{
                       fontFamily: font,
+                      fontSize: fontSize,
                       color: textColor,
                       textShadow: `${showShadows ? "black 1px 1px 1px" : ""}`,
                       padding: gap,

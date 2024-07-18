@@ -16,6 +16,7 @@ export type State = {
   showNumbers: boolean;
   showShadows: boolean;
   font: Font | string;
+  fontSize: number;
   textColor: string;
   titlesPosition: Position;
   items: Item[];
