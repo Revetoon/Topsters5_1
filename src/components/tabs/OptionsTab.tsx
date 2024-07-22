@@ -1,5 +1,11 @@
 import Selector from "@/components/Selector";
-import { BackgroundType, Direction, Font, Position } from "@/redux/state";
+import {
+  BackgroundType,
+  Direction,
+  Font,
+  ImageFilter,
+  Position,
+} from "@/redux/state";
 import {
   exportState,
   importState,
@@ -8,10 +14,12 @@ import {
   setBackgroundColor2,
   setBackgroundOpacity,
   setBackgroundType,
+  setImageFilter,
   setBorderColor,
   setBorderRadius,
   setBorderSize,
   setColumns,
+  setFeatured,
   setFont,
   setFontSize,
   setGap,
@@ -36,6 +44,7 @@ const OptionsTab = ({
   dispatch,
   rows,
   columns,
+  featured,
   title,
   showTitles,
   showNumbers,
@@ -44,6 +53,7 @@ const OptionsTab = ({
   textColor,
   titlesPosition,
   backgroundType,
+  imageFilter,
   gradientDirection,
   backgroundOpacity,
   backgroundColor1,
@@ -60,6 +70,7 @@ const OptionsTab = ({
   dispatch: any;
   rows: number;
   columns: number;
+  featured: number;
   title: string;
   showTitles: boolean;
   showNumbers: boolean;
@@ -68,6 +79,7 @@ const OptionsTab = ({
   textColor: string;
   titlesPosition: string;
   backgroundType: string;
+  imageFilter: ImageFilter;
   gradientDirection: string;
   backgroundOpacity: number;
   backgroundColor1: string;
@@ -191,6 +203,23 @@ const OptionsTab = ({
               type="range"
             ></input>
             <span className={styles["range-value"]}>{columns}</span>
+          </div>
+        </div>
+        <div className={styles.input}>
+          <label className={styles["input-label"]}>Featured</label>
+          <div className={styles.values}>
+            <input
+              onChange={(value) => {
+                dispatch(setFeatured(parseInt(value.target.value)));
+              }}
+              min={0}
+              max={(rows * columns) / 2}
+              value={featured}
+              step={Math.floor(columns / 2)}
+              className={styles.value}
+              type="range"
+            ></input>
+            <span className={styles["range-value"]}>{featured}</span>
           </div>
         </div>
       </div>
@@ -489,6 +518,41 @@ const OptionsTab = ({
               max={20}
             ></input>
             <span className={styles["range-value"]}>{borderRadius}</span>
+          </div>
+        </div>
+        <div style={{ height: "88px" }} className={styles.input}>
+          <label className={styles["input-label"]}>Filter</label>
+          <div className={styles.values}>
+            <Selector
+              options={[
+                {
+                  id: ImageFilter.normal,
+                  name: ImageFilter.normal,
+                },
+                {
+                  id: ImageFilter.grayscale,
+                  name: ImageFilter.grayscale,
+                },
+                {
+                  id: ImageFilter.hueRotate,
+                  name: ImageFilter.hueRotate,
+                },
+                {
+                  id: ImageFilter.invert,
+                  name: ImageFilter.invert,
+                },
+                {
+                  id: ImageFilter.sepia,
+                  name: ImageFilter.sepia,
+                },
+                {
+                  id: ImageFilter.saturate,
+                  name: ImageFilter.saturate,
+                },
+              ]}
+              selected={[imageFilter]}
+              onChange={(value) => dispatch(setImageFilter(value))}
+            ></Selector>
           </div>
         </div>
         <div className={styles.input}>

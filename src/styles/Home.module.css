@@ -154,7 +154,6 @@
 .input {
   display: flex;
   align-items: center;
-  height: 48px;
   border-bottom: 1px solid var(--borderColor);
   transition-duration: 0.2s;
 }
@@ -175,7 +174,7 @@
 }
 
 .values {
-  padding: 0 12px;
+  padding: 12px 12px;
   width: calc(100% - 96px);
   display: flex;
   flex-wrap: wrap;
@@ -453,7 +452,7 @@ input[type="color"].value:hover {
   gap: 8px;
   flex-direction: column;
   align-items: center;
-  width: 100px;
+  justify-self: center;
   position: relative;
 }
 

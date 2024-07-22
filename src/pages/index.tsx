@@ -144,7 +144,9 @@ export default function Home() {
   const showTitles = useSelector((state: State) => state.showTitles);
   const rows = useSelector((state: State) => state.rows);
   const columns = useSelector((state: State) => state.columns);
+  const featured = useSelector((state: State) => state.featured);
   const backgroundType = useSelector((state: State) => state.backgroundType);
+  const imageFilter = useSelector((state: State) => state.imageFilter);
   const backgroundColor1 = useSelector(
     (state: State) => state.backgroundColor1
   );
@@ -178,7 +180,7 @@ export default function Home() {
         <title>Zopsters</title>
         <meta name="description" content="Zopsters" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.png" />
+        <link rel="icon" href="/zopsters.png" />
       </Head>
       <main className={`${styles.main}`}>
         <div className={styles.container}>
@@ -272,7 +274,9 @@ export default function Home() {
                     showTitles={showTitles}
                     rows={rows}
                     columns={columns}
+                    featured={featured}
                     backgroundType={backgroundType}
+                    imageFilter={imageFilter}
                     backgroundColor1={backgroundColor1}
                     backgroundColor2={backgroundColor2}
                     backgroundOpacity={backgroundOpacity}
@@ -310,7 +314,9 @@ export default function Home() {
             showTitles={showTitles}
             rows={rows}
             columns={columns}
+            featured={featured}
             backgroundType={backgroundType}
+            imageFilter={imageFilter}
             backgroundColor1={backgroundColor1}
             backgroundColor2={backgroundColor2}
             backgroundOpacity={backgroundOpacity}

@@ -3,6 +3,7 @@ import {
   BackgroundType,
   Direction,
   Font,
+  ImageFilter,
   Item,
   Position,
   State,
@@ -11,7 +12,7 @@ import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
 const itemArray = [];
-for (let i = 0; i < 100; ++i) {
+for (let i = 0; i < 105; ++i) {
   itemArray.push({ title: "", cover: "" });
 }
 
@@ -20,6 +21,8 @@ const copy = (targetState: State, sourceState: State) => {
   targetState.showTitles = sourceState.showTitles;
   targetState.rows = sourceState.rows;
   targetState.columns = sourceState.columns;
+  targetState.featured = sourceState.featured;
+  targetState.imageFilter = sourceState.imageFilter;
   targetState.backgroundType = sourceState.backgroundType;
   targetState.backgroundColor1 = sourceState.backgroundColor1;
   targetState.backgroundColor2 = sourceState.backgroundColor2;
@@ -43,7 +46,9 @@ const initialState: State = {
   showTitles: true,
   rows: 5,
   columns: 5,
+  featured: 0,
   backgroundType: BackgroundType.color,
+  imageFilter: ImageFilter.normal,
   backgroundColor1: "#000000",
   backgroundColor2: "#000000",
   backgroundOpacity: 16,
@@ -77,6 +82,14 @@ export const stateSlice = createSlice({
     },
     setColumns: (state, value: { payload: number }) => {
       state.columns = value.payload;
+      // Set featured to 0 if columns change
+      state.featured = 0;
+    },
+    setFeatured: (state, value: { payload: number }) => {
+      state.featured = value.payload;
+    },
+    setImageFilter: (state, value: { payload: ImageFilter }) => {
+      state.imageFilter = value.payload;
     },
     setBackgroundType: (state, value: { payload: BackgroundType }) => {
       state.backgroundType = value.payload;
@@ -161,6 +174,7 @@ export const stateSlice = createSlice({
         case "Topsters":
           state.rows = 5;
           state.columns = 5;
+          state.featured = 0;
           state.showTitles = true;
           state.backgroundType = BackgroundType.color;
           state.backgroundColor1 = "#000000";
@@ -179,6 +193,7 @@ export const stateSlice = createSlice({
         case "Museum":
           state.rows = 3;
           state.columns = 8;
+          state.featured = 0;
           state.showTitles = true;
           state.backgroundType = BackgroundType.gradient;
           state.gradientDirection = Direction.topRight;
@@ -199,6 +214,7 @@ export const stateSlice = createSlice({
         case "Mega List":
           state.rows = 10;
           state.columns = 10;
+          state.featured = 10;
           state.showTitles = true;
           state.backgroundType = BackgroundType.color;
           state.backgroundColor1 = "#000000";
@@ -236,7 +252,7 @@ export const stateSlice = createSlice({
     },
     restart: (state) => {
       const itemArray = [];
-      for (let i = 0; i < 100; ++i) {
+      for (let i = 0; i < 105; ++i) {
         itemArray.push({ title: "", cover: "" });
       }
       copy(state, initialState);
@@ -250,6 +266,8 @@ export const {
   setShowTitles,
   setRows,
   setColumns,
+  setFeatured,
+  setImageFilter,
   setBackgroundType,
   setBackgroundColor1,
   setBackgroundColor2,

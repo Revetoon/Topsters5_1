@@ -3,7 +3,9 @@ export type State = {
   showTitles: boolean;
   rows: number;
   columns: number;
+  featured: number;
   backgroundType: BackgroundType;
+  imageFilter: ImageFilter;
   backgroundColor1: string;
   backgroundColor2: string;
   backgroundOpacity: number;
@@ -26,6 +28,15 @@ export enum BackgroundType {
   color = "Color",
   gradient = "Gradient",
   radialGradient = "Radial gradient",
+}
+
+export enum ImageFilter {
+  normal = "Normal",
+  grayscale = "Grayscale",
+  sepia = "Sepia",
+  saturate = "Saturate",
+  hueRotate = "Hue rotate",
+  invert = "Invert",
 }
 
 export enum Direction {

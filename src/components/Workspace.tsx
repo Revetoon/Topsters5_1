@@ -1,5 +1,12 @@
 import { downloadImage } from "@/components/utils";
-import { BackgroundType, Direction, Font, Item, Position } from "@/redux/state";
+import {
+  BackgroundType,
+  Direction,
+  Font,
+  ImageFilter,
+  Item,
+  Position,
+} from "@/redux/state";
 import { removeItem } from "@/redux/store";
 import styles from "@/styles/Home.module.css";
 import { UnknownAction } from "@reduxjs/toolkit";
@@ -12,7 +19,9 @@ const Workspace = ({
   showTitles,
   rows,
   columns,
+  featured,
   backgroundType,
+  imageFilter,
   backgroundColor1,
   backgroundColor2,
   backgroundOpacity,
@@ -44,7 +53,9 @@ const Workspace = ({
   showTitles: boolean;
   rows: number;
   columns: number;
+  featured: number;
   backgroundType: BackgroundType;
+  imageFilter: ImageFilter;
   backgroundColor1: string;
   backgroundColor2: string;
   backgroundOpacity: number;
@@ -79,6 +90,26 @@ const Workspace = ({
   dispatch: Dispatch<UnknownAction>;
   hasData: (item: Item) => boolean;
 }) => {
+  const maxItems = rows * columns + (featured !== columns ? featured : 0);
+  const featuredSize = 200 + gap;
+
+  const getSize = (i: number) => (featured > i ? `${featuredSize}px` : "100px");
+  const getFilter = () => {
+    switch (imageFilter) {
+      case ImageFilter.grayscale:
+        return "grayscale(1)";
+      case ImageFilter.sepia:
+        return "sepia(1)";
+      case ImageFilter.saturate:
+        return "saturate(8)";
+      case ImageFilter.hueRotate:
+        return "hue-rotate(180deg)";
+      case ImageFilter.invert:
+        return "invert(1)";
+      default:
+        return "none";
+    }
+  };
   return (
     <div className={styles.workspace}>
       <div
@@ -184,7 +215,7 @@ const Workspace = ({
                   className={styles["workspace-covers"]}
                 >
                   {items
-                    .filter((_item, i) => i < rows * columns)
+                    .filter((_item, i) => i < maxItems)
                     .map((item, i) => (
                       <div
                         key={i}
@@ -193,10 +224,13 @@ const Workspace = ({
                           styles.dragging
                         }`}
                         style={{
-                          minHeight: "100px",
+                          minHeight: getSize(i),
                           height: `${
                             titlesPosition === Position.side ? "100px" : "unset"
                           }`,
+                          width: getSize(i),
+                          // If featured, allow it to take up 2 grid columns
+                          gridColumn: featured > i ? "span 2" : "span 1",
                           borderRadius: borderRadius,
                         }}
                         onDrop={() => onDrop(i)}
@@ -233,7 +267,7 @@ const Workspace = ({
                           <div
                             style={{
                               backgroundColor: `#ccc`,
-                              height: "100px",
+                              height: getSize(i),
                               borderRadius: isCircle ? "100%" : borderRadius,
                               boxShadow: `${
                                 showShadows ? "black 3px 3px 10px 0px" : "unset"
@@ -292,10 +326,12 @@ const Workspace = ({
                               className={styles.cover}
                               style={{
                                 borderRadius: isCircle ? "100%" : borderRadius,
-                                height: `${isCircle ? "100px" : "unset"}`,
-                                maxHeight: "100px",
-                                maxWidth: "100px",
+                                height: `${isCircle ? getSize(i) : "unset"}`,
+                                width: getSize(i),
+                                maxHeight: getSize(i),
+                                maxWidth: getSize(i),
                                 border: `${borderSize}px solid ${borderColor}`,
+                                filter: getFilter(),
                                 boxShadow: `${
                                   showShadows
                                     ? "black 3px 3px 10px 0px"
@@ -304,7 +340,9 @@ const Workspace = ({
                               }}
                               src={"https:" + item.cover}
                               alt="Cover"
-                              width={isCircle ? 100 : "unset"}
+                              width={
+                                isCircle ? (featured > i ? 200 : 100) : "unset"
+                              }
                             ></img>
                             {showTitles &&
                               titlesPosition === Position.cover && (
@@ -355,7 +393,7 @@ const Workspace = ({
                       </div>
                     )}
                     {items
-                      .filter((_item, i) => i < rows * columns)
+                      .filter((_item, i) => i < maxItems)
                       .map((item, i) => {
                         const number = showNumbers ? `${i + 1}. ` : "";
                         const br = (i + 1) % columns === 0 ? <br></br> : "";

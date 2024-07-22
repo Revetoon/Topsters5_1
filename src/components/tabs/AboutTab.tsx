@@ -18,6 +18,7 @@ const AboutTab = () => {
           <ul>
             <li>- Import from last.fm</li>
             <li>- More customization options</li>
+            <li>- Feature the top items in your list</li>
           </ul>
         </p>
         <h2>Data sources</h2>

@@ -107,7 +107,7 @@ async function musicRequest(name: string, res: any) {
 async function lastfmRequest(name: string, period: string, res: any) {
   await axios({
     method: "GET",
-    url: `http://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${name}&api_key=${process.env.LASTFM_KEY}&format=json&period=${period}&limit=100`,
+    url: `http://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${name}&api_key=${process.env.LASTFM_KEY}&format=json&period=${period}&limit=105`,
   })
     .then(async (resp) => {
       const ret = resp.data.topalbums.album.map(
