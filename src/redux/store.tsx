@@ -189,6 +189,8 @@ export const stateSlice = createSlice({
     },
     addMultipleItems: (state, value: { payload: { items: Item[] } }) => {
       state.items = value.payload.items;
+      state.sortedItems = value.payload.items;
+      state.battleItems = [];
     },
     swapItem: (
       state,
@@ -314,6 +316,8 @@ export const stateSlice = createSlice({
         return item;
       });
       state.items = fromFile.items;
+      state.sortedItems = fromFile.items;
+      state.battleItems = [];
     },
     exportState: (state) => {
       var dataStr =
@@ -336,6 +340,8 @@ export const stateSlice = createSlice({
       }
       copy(state, initialState);
       state.items = itemArray;
+      state.sortedItems = itemArray;
+      state.battleItems = [];
     },
   },
 });

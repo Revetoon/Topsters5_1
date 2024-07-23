@@ -1,5 +1,10 @@
 import { Category, Item, Period, State } from "@/redux/state";
-import { addItem, addMultipleItems, swapItem } from "@/redux/store";
+import {
+  addItem,
+  addMultipleItems,
+  setBattleItems,
+  swapItem,
+} from "@/redux/store";
 import styles from "@/styles/Home.module.css";
 import axios from "axios";
 import Head from "next/head";
@@ -16,6 +21,23 @@ import BattleTab from "@/components/tabs/BattleTab";
 export default function Home() {
   const hasData = (item: Item) => {
     return !!item?.title && !!item?.cover;
+  };
+
+  const hasItems = (items: Item[]) => {
+    // Check if there are any valid items in the array
+    for (let i = 0; i < items.length; i++) {
+      if (hasData(items[i])) return true;
+    }
+    return false;
+  };
+
+  const getNumberItems = () => {
+    // Get the number of valid items in the array
+    let count = 0;
+    for (let i = 0; i < items.length; i++) {
+      if (hasData(items[i])) count++;
+    }
+    return count;
   };
 
   const resetDrag = () => {
@@ -247,7 +269,10 @@ export default function Home() {
                   </h2>
                 </div>
                 <div
-                  onClick={() => setTab("battle")}
+                  onClick={() => {
+                    setTab("battle");
+                    dispatch(setBattleItems([]));
+                  }}
                   className={`${styles.tab} ${
                     tab === "battle" && styles["selected-tab"]
                   }`}
@@ -377,6 +402,8 @@ export default function Home() {
               titlesPosition={titlesPosition}
               dispatch={dispatch}
               hasData={hasData}
+              hasItems={hasItems}
+              getNumberItems={getNumberItems}
               numberBattleItems={numberBattleItems}
             />
           ) : (

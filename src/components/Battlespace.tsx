@@ -33,6 +33,8 @@ const Battlespace = ({
   items,
   dispatch,
   hasData,
+  hasItems,
+  getNumberItems,
   numberBattleItems,
   lockWinner,
 }: {
@@ -62,6 +64,8 @@ const Battlespace = ({
   items: Item[];
   dispatch: Dispatch<UnknownAction>;
   hasData: (item: Item) => boolean;
+  hasItems: (items: Item[]) => boolean;
+  getNumberItems: () => number;
   numberBattleItems: number;
   lockWinner: boolean;
 }) => {
@@ -75,8 +79,12 @@ const Battlespace = ({
 
   const cycleBattleItems = (winner?: number) => {
     const newBattleItems = [];
-    // Generate min(numberBattleItems, items.length) random items
-    const numItems = Math.min(numberBattleItems, items.length);
+    // Generate min(numberBattleItems, getNumberItems) random items
+    const numItems = Math.min(numberBattleItems, getNumberItems());
+    if (numItems === 0) {
+      dispatch(setBattleItems([]));
+      return;
+    }
     for (let i = 0; i < numItems; i++) {
       newBattleItems[i] = chooseRandomItemForBattle();
       // Make sure the same item is not selected twice
@@ -87,7 +95,12 @@ const Battlespace = ({
     // Get index of the winner and put it back in the battle items where it was
     if (lockWinner && winner !== undefined) {
       const winnerIndex = battleItems.indexOf(winner);
-      if (winnerIndex !== -1) {
+      if (newBattleItems.includes(winner)) {
+        // Swap to keep the winner in the same position
+        const otherItem = newBattleItems[winnerIndex];
+        newBattleItems[winnerIndex] = winner;
+        newBattleItems[newBattleItems.indexOf(winner)] = otherItem;
+      } else if (winnerIndex !== -1) {
         newBattleItems[winnerIndex] = winner;
       }
     }
@@ -205,7 +218,7 @@ const Battlespace = ({
                   }}
                   className={styles["workspace-covers"]}
                 >
-                  {battleItems.length === 0 ? (
+                  {battleItems.length === 0 || !hasItems(items) ? (
                     <div
                       style={{
                         gridColumn: "span 10",
@@ -225,14 +238,20 @@ const Battlespace = ({
                         your collection. Over time, the ELO rating will reflect
                         the ranking of your collection.
                       </p>
-                      <Button
-                        style={{ fontSize: "1.5rem", padding: "1rem 2rem" }}
-                        onClick={() => {
-                          cycleBattleItems();
-                        }}
-                      >
-                        Start Battle
-                      </Button>
+                      {!hasItems(items) ? (
+                        <h2>
+                          Add items to your collection to start the battle mode.
+                        </h2>
+                      ) : (
+                        <Button
+                          style={{ fontSize: "1.5rem", padding: "1rem 2rem" }}
+                          onClick={() => {
+                            cycleBattleItems();
+                          }}
+                        >
+                          Start Battle
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <div
@@ -253,23 +272,23 @@ const Battlespace = ({
                   )}
                   {battleItems
                     .filter((_item, i) => i < numberBattleItems)
-                    .map((itemIndex, i) => (
-                      <div
-                        key={i}
-                        className={`${styles["workspace-cover"]}`}
-                        style={{
-                          minHeight: getSize(),
-                          height: "250px",
-                          width: getSize(),
-                          gridColumn: "span 2",
-                          borderRadius: borderRadius,
-                        }}
-                        onClick={() => {
-                          battleWinner(itemIndex);
-                        }}
-                      >
-                        {hasData(items[itemIndex]) && (
-                          <>
+                    .map(
+                      (itemIndex, i) =>
+                        hasData(items[itemIndex]) && (
+                          <div
+                            key={i}
+                            className={`${styles["workspace-cover"]}`}
+                            style={{
+                              minHeight: getSize(),
+                              height: "250px",
+                              width: getSize(),
+                              gridColumn: "span 2",
+                              borderRadius: borderRadius,
+                            }}
+                            onClick={() => {
+                              battleWinner(itemIndex);
+                            }}
+                          >
                             <img
                               className={styles.cover}
                               style={{
@@ -304,10 +323,9 @@ const Battlespace = ({
                               <div>{items[itemIndex].title}</div>
                               <div>{items[itemIndex].elo}</div>
                             </div>
-                          </>
-                        )}
-                      </div>
-                    ))}
+                          </div>
+                        )
+                    )}
                 </div>
               </div>
             </div>
