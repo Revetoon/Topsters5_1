@@ -38,6 +38,7 @@ export enum BackgroundType {
 
 export enum Sort {
   // This is the custom sort order
+  none = "None",
   default = "Default",
   elo = "Elo Rating",
 }

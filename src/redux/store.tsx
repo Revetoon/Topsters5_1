@@ -12,8 +12,9 @@ import {
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
+const maxItems = 105;
 const itemArray = [];
-for (let i = 0; i < 105; ++i) {
+for (let i = 0; i < maxItems; ++i) {
   itemArray.push({ title: "", cover: "", elo: 0 });
 }
 
@@ -105,6 +106,11 @@ export const stateSlice = createSlice({
           break;
       }
     },
+    // Make the current sort method the default order of items
+    makeSortDefault: (state) => {
+      state.sort = Sort.default;
+      state.items = state.sortedItems;
+    },
     setLockWinner: (state, value: { payload: boolean }) => {
       state.lockWinner = value.payload;
     },
@@ -186,11 +192,19 @@ export const stateSlice = createSlice({
           ...value.payload.item,
           elo: 1000,
         };
+      state.sort = Sort.default;
     },
     addMultipleItems: (state, value: { payload: { items: Item[] } }) => {
+      // Pad items with empty items
+      for (let i = 0; i < maxItems; ++i) {
+        if (!value.payload.items[i]) {
+          value.payload.items[i] = { title: "", cover: "", elo: 0 };
+        }
+      }
       state.items = value.payload.items;
       state.sortedItems = value.payload.items;
       state.battleItems = [];
+      state.sort = Sort.default;
     },
     swapItem: (
       state,
@@ -202,13 +216,36 @@ export const stateSlice = createSlice({
         };
       }
     ) => {
-      const toMove = state.items[value.payload.sourceIndex];
-      state.items[value.payload.sourceIndex] =
-        state.items[value.payload.destinationIndex];
-      state.items[value.payload.destinationIndex] = toMove;
+      switch (state.sort) {
+        case Sort.default:
+          const toMove = state.items[value.payload.sourceIndex];
+          state.items[value.payload.sourceIndex] =
+            state.items[value.payload.destinationIndex];
+          state.items[value.payload.destinationIndex] = toMove;
+          break;
+        case Sort.elo:
+          const toMoveElo = state.sortedItems[value.payload.sourceIndex];
+          state.sortedItems[value.payload.sourceIndex] =
+            state.sortedItems[value.payload.destinationIndex];
+          state.sortedItems[value.payload.destinationIndex] = toMoveElo;
+          state.sort = Sort.none;
+          break;
+      }
     },
     removeItem: (state, value: { payload: number }) => {
       state.items[value.payload] = { title: "", cover: "", elo: 0 };
+      state.sort = Sort.default;
+    },
+    removeDuplicateItems: (state) => {
+      const newItems = state.items.map((item, index, self) =>
+        self.findIndex((t) => t.cover === item.cover) === index
+          ? item
+          : { ...item, cover: "", elo: 0 }
+      );
+      state.items = newItems;
+      state.sortedItems = newItems;
+      state.battleItems = [];
+      state.sort = Sort.default;
     },
     updateElo: (
       state,
@@ -318,6 +355,7 @@ export const stateSlice = createSlice({
       state.items = fromFile.items;
       state.sortedItems = fromFile.items;
       state.battleItems = [];
+      state.sort = Sort.default;
     },
     exportState: (state) => {
       var dataStr =
@@ -335,13 +373,14 @@ export const stateSlice = createSlice({
     },
     restart: (state) => {
       const itemArray = [];
-      for (let i = 0; i < 105; ++i) {
+      for (let i = 0; i < maxItems; ++i) {
         itemArray.push({ title: "", cover: "", elo: 0 });
       }
       copy(state, initialState);
       state.items = itemArray;
       state.sortedItems = itemArray;
       state.battleItems = [];
+      state.sort = Sort.default;
     },
   },
 });
@@ -383,6 +422,8 @@ export const {
   exportState,
   importState,
   restart,
+  makeSortDefault,
+  removeDuplicateItems,
 } = stateSlice.actions;
 
 const persistConfig = {

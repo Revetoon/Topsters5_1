@@ -36,6 +36,8 @@ import {
   setTitle,
   setTitlesPosition,
   setSort,
+  makeSortDefault,
+  removeDuplicateItems,
 } from "@/redux/store";
 import styles from "@/styles/Home.module.css";
 import Image from "next/image";
@@ -124,10 +126,18 @@ const OptionsTab = ({
         </div>
       </div>
       <div className={styles["input-group"]}>
-        <div className={styles.input}>
+        <div style={{ height: "88px" }} className={styles.input}>
           <label className={styles["input-label"]}>Data</label>
           <div className={styles.values}>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                maxWidth: "100%",
+                overflow: "hidden",
+                flexWrap: "wrap",
+              }}
+            >
               <label htmlFor="file" className={styles["file-upload"]}>
                 Import
               </label>
@@ -150,6 +160,14 @@ const OptionsTab = ({
                 }}
               >
                 Export
+              </Button>
+              <Button
+                onClick={() => {
+                  confirm("Are you sure you want to remove all duplicates?") &&
+                    dispatch(removeDuplicateItems());
+                }}
+              >
+                Remove Dupes
               </Button>
               <Button
                 onClick={() => {
@@ -191,6 +209,22 @@ const OptionsTab = ({
               selected={[sort]}
               onChange={(value) => dispatch(setSort(value))}
             ></Selector>
+          </div>
+        </div>
+        <div className={styles.input}>
+          <label className={styles["input-label"]}>Save Layout</label>
+          <div className={styles.values}>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <Button
+                onClick={() => {
+                  confirm(
+                    "Are you sure you want to overwrite your default list with the current list?"
+                  ) && dispatch(makeSortDefault());
+                }}
+              >
+                Save As Default
+              </Button>
+            </div>
           </div>
         </div>
       </div>

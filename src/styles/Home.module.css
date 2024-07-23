@@ -149,6 +149,7 @@
   background-color: var(--backgroundColor);
   border: 1px solid var(--borderColor);
   margin: 12px 0;
+  overflow: hidden;
 }
 
 .input {
@@ -171,6 +172,7 @@
   height: 100%;
   padding: 16px 16px;
   border-right: 1px solid var(--borderColor);
+  text-align: center;
 }
 
 .values {
