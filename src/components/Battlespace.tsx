@@ -27,8 +27,9 @@ const Battlespace = ({
   borderSize,
   borderRadius,
   showShadows,
+  showTitles,
+  showEloRating,
   font,
-  fontSize,
   textColor,
   items,
   dispatch,
@@ -41,6 +42,7 @@ const Battlespace = ({
   battleItems: number[];
   title: string;
   showTitles: boolean;
+  showEloRating: boolean;
   rows: number;
   columns: number;
   featured: number;
@@ -58,7 +60,6 @@ const Battlespace = ({
   showNumbers: boolean;
   showShadows: boolean;
   font: Font | string;
-  fontSize: number;
   textColor: string;
   titlesPosition: Position;
   items: Item[];
@@ -280,7 +281,7 @@ const Battlespace = ({
                             className={`${styles["workspace-cover"]}`}
                             style={{
                               minHeight: getSize(),
-                              height: "250px",
+                              height: "unset",
                               width: getSize(),
                               gridColumn: "span 2",
                               borderRadius: borderRadius,
@@ -313,15 +314,29 @@ const Battlespace = ({
                               className={styles["cover-titles"]}
                               style={{
                                 fontFamily: font,
-                                fontSize: fontSize,
+                                fontSize: "1rem",
                                 color: textColor,
                                 textShadow: `${
                                   showShadows ? "black 1px 1px 1px" : ""
                                 }`,
                               }}
                             >
-                              <div>{items[itemIndex].title}</div>
-                              <div>{items[itemIndex].elo}</div>
+                              {showTitles && (
+                                <div
+                                  style={{
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    lineHeight: "1.5rem",
+                                    height: "3rem",
+                                    width: getSize(),
+                                  }}
+                                >
+                                  {items[itemIndex].title}
+                                </div>
+                              )}
+                              {showEloRating && (
+                                <div>{items[itemIndex].elo}</div>
+                              )}
                             </div>
                           </div>
                         )

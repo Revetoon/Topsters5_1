@@ -363,10 +363,9 @@ export default function Home() {
                   <BattleTab
                     dispatch={dispatch}
                     showTitles={showTitles}
-                    font={font}
-                    fontSize={fontSize}
                     numberBattleItems={numberBattleItems}
                     lockWinner={lockWinner}
+                    showEloRating={showEloRating}
                   />
                 )}
                 {tab === "about" && <AboutTab />}
@@ -380,6 +379,7 @@ export default function Home() {
               items={items}
               title={title}
               showTitles={showTitles}
+              showEloRating={showEloRating}
               rows={rows}
               columns={columns}
               featured={featured}
@@ -397,7 +397,6 @@ export default function Home() {
               showNumbers={showNumbers}
               showShadows={showShadows}
               font={font}
-              fontSize={fontSize}
               textColor={textColor}
               titlesPosition={titlesPosition}
               dispatch={dispatch}

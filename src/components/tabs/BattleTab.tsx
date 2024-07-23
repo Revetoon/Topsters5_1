@@ -6,6 +6,7 @@ import {
   setShowTitles,
   setNumberBattleItems,
   setLockWinner,
+  setShowEloRating,
 } from "@/redux/store";
 import styles from "@/styles/Home.module.css";
 import Image from "next/image";
@@ -14,16 +15,14 @@ import Button from "../Button";
 const BattleTab = ({
   dispatch,
   showTitles,
+  showEloRating,
   lockWinner,
-  font,
-  fontSize,
   numberBattleItems,
 }: {
   dispatch: any;
   showTitles: boolean;
+  showEloRating: boolean;
   lockWinner: boolean;
-  font: string;
-  fontSize: number;
   numberBattleItems: number;
 }) => {
   return (
@@ -112,42 +111,31 @@ const BattleTab = ({
             </Button>
           </div>
         </div>
-        <div style={{ height: "88px" }} className={styles.input}>
-          <label className={styles["input-label"]}>Font</label>
-          <div className={styles.values}>
-            <Selector
-              options={[
-                { id: Font.monospace, name: Font.monospace },
-                { id: Font.lato, name: Font.lato },
-              ]}
-              selected={[font]}
-              onChange={(value) => {
-                dispatch(setFont(value));
-              }}
-            ></Selector>
-            <input
-              onChange={(e) => dispatch(setFont(e.target.value))}
-              className={styles.value}
-              value={font}
-              placeholder="Set a font..."
-              type="text"
-            ></input>
-          </div>
-        </div>
         <div className={styles.input}>
-          <label className={styles["input-label"]}>Font Size</label>
+          <label className={styles["input-label"]}>Show ELO</label>
           <div className={styles.values}>
-            <input
-              onChange={(value) => {
-                dispatch(setFontSize(parseInt(value.target.value)));
-              }}
-              min={6}
-              max={24}
-              value={fontSize}
-              className={styles.value}
-              type="range"
-            ></input>
-            <span className={styles["range-value"]}>{fontSize}</span>
+            <Button
+              selected={showEloRating}
+              onClick={() => dispatch(setShowEloRating(!showEloRating))}
+            >
+              {showEloRating ? (
+                <Image
+                  width={10}
+                  height={10}
+                  className={styles.icon}
+                  src="/icons/check.svg"
+                  alt="Check"
+                ></Image>
+              ) : (
+                <Image
+                  width={10}
+                  height={10}
+                  className={styles.icon}
+                  src="/icons/cancel.svg"
+                  alt="Cancel"
+                ></Image>
+              )}
+            </Button>
           </div>
         </div>
       </div>
