@@ -5,6 +5,7 @@ import {
   Font,
   ImageFilter,
   Position,
+  Sort,
 } from "@/redux/state";
 import {
   exportState,
@@ -28,11 +29,13 @@ import {
   setPreset,
   setRows,
   setShowNumbers,
+  setShowEloRating,
   setShowShadows,
   setShowTitles,
   setTextColor,
   setTitle,
   setTitlesPosition,
+  setSort,
 } from "@/redux/store";
 import styles from "@/styles/Home.module.css";
 import Image from "next/image";
@@ -48,6 +51,7 @@ const OptionsTab = ({
   title,
   showTitles,
   showNumbers,
+  showEloRating,
   font,
   fontSize,
   textColor,
@@ -64,6 +68,7 @@ const OptionsTab = ({
   borderColor,
   gap,
   showShadows,
+  sort,
 }: {
   darkTheme: boolean;
   toggleTheme: () => void;
@@ -74,6 +79,7 @@ const OptionsTab = ({
   title: string;
   showTitles: boolean;
   showNumbers: boolean;
+  showEloRating: boolean;
   font: string;
   fontSize: number;
   textColor: string;
@@ -90,6 +96,7 @@ const OptionsTab = ({
   borderColor: string;
   gap: number;
   showShadows: boolean;
+  sort: Sort;
 }) => {
   return (
     <div className={`animate-opacity`}>
@@ -168,6 +175,21 @@ const OptionsTab = ({
               ]}
               selected={[]}
               onChange={(value) => dispatch(setPreset(value))}
+            ></Selector>
+          </div>
+        </div>
+      </div>
+      <div className={styles["input-group"]}>
+        <div className={styles.input}>
+          <label className={styles["input-label"]}>Sort</label>
+          <div className={styles.values}>
+            <Selector
+              options={[
+                { id: Sort.default, name: Sort.default },
+                { id: Sort.elo, name: Sort.elo },
+              ]}
+              selected={[sort]}
+              onChange={(value) => dispatch(setSort(value))}
             ></Selector>
           </div>
         </div>
@@ -271,6 +293,33 @@ const OptionsTab = ({
               onClick={() => dispatch(setShowNumbers(!showNumbers))}
             >
               {showNumbers ? (
+                <Image
+                  width={10}
+                  height={10}
+                  className={styles.icon}
+                  src="/icons/check.svg"
+                  alt="Check"
+                ></Image>
+              ) : (
+                <Image
+                  width={10}
+                  height={10}
+                  className={styles.icon}
+                  src="/icons/cancel.svg"
+                  alt="Cancel"
+                ></Image>
+              )}
+            </Button>
+          </div>
+        </div>
+        <div className={styles.input}>
+          <label className={styles["input-label"]}>Show ELO</label>
+          <div className={styles.values}>
+            <Button
+              selected={showEloRating}
+              onClick={() => dispatch(setShowEloRating(!showEloRating))}
+            >
+              {showEloRating ? (
                 <Image
                   width={10}
                   height={10}

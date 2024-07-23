@@ -6,6 +6,7 @@ import {
   ImageFilter,
   Item,
   Position,
+  Sort,
 } from "@/redux/state";
 import { removeItem } from "@/redux/store";
 import styles from "@/styles/Home.module.css";
@@ -17,6 +18,7 @@ const Workspace = ({
   isDownloading,
   title,
   showTitles,
+  showEloRating,
   rows,
   columns,
   featured,
@@ -38,6 +40,8 @@ const Workspace = ({
   textColor,
   titlesPosition,
   items,
+  sortedItems,
+  sort,
   draggingItem,
   hoverItem,
   setIsDownloading,
@@ -51,6 +55,7 @@ const Workspace = ({
   isDownloading: boolean;
   title: string;
   showTitles: boolean;
+  showEloRating: boolean;
   rows: number;
   columns: number;
   featured: number;
@@ -72,6 +77,8 @@ const Workspace = ({
   textColor: string;
   titlesPosition: Position;
   items: Item[];
+  sortedItems: Item[];
+  sort: Sort;
   draggingItem: {
     item: Item;
     index: number;
@@ -92,6 +99,9 @@ const Workspace = ({
 }) => {
   const maxItems = rows * columns + (featured !== columns ? featured : 0);
   const featuredSize = 200 + gap;
+  if (sort !== Sort.default) {
+    items = sortedItems;
+  }
 
   const getSize = (i: number) => (featured > i ? `${featuredSize}px` : "100px");
   const getFilter = () => {
@@ -361,6 +371,9 @@ const Workspace = ({
                                     {`${showNumbers ? `${i + 1}. ` : ""}` +
                                       item.title}
                                   </div>
+                                  {showEloRating && (
+                                    <div>{`Elo: ${item.elo}`}</div>
+                                  )}
                                 </div>
                               )}
                           </>
@@ -399,7 +412,10 @@ const Workspace = ({
                         const br = (i + 1) % columns === 0 ? <br></br> : "";
                         const res = hasData(item) ? (
                           <div key={i}>
-                            <div>{number + item.title}</div>
+                            <div>
+                              {number + item.title}{" "}
+                              {showEloRating && " (" + item.elo + ")"}
+                            </div>
                             {br}
                           </div>
                         ) : (

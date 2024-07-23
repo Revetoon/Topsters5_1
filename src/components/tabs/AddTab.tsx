@@ -46,7 +46,7 @@ const AddTab = ({
   importItems: () => void;
   setPeriod: Dispatch<SetStateAction<Period>>;
   period: Period;
-  searchedItems: { title: string; cover: string }[];
+  searchedItems: { title: string; cover: string; elo: 1000 }[];
   resetDrag: () => void;
   setDraggingItem: Dispatch<
     SetStateAction<{

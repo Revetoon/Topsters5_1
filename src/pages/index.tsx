@@ -10,6 +10,8 @@ import Workspace from "@/components/Workspace";
 import AddTab from "@/components/tabs/AddTab";
 import OptionsTab from "@/components/tabs/OptionsTab";
 import AboutTab from "@/components/tabs/AboutTab";
+import Battlespace from "@/components/Battlespace";
+import BattleTab from "@/components/tabs/BattleTab";
 
 export default function Home() {
   const hasData = (item: Item) => {
@@ -22,6 +24,7 @@ export default function Home() {
       item: {
         title: "",
         cover: "",
+        elo: 0,
       },
       index: -1,
       origin: "",
@@ -56,6 +59,7 @@ export default function Home() {
         {
           title: itemForm.title,
           cover: itemForm.url.replace(/(^\w+:|^)\/\//, ""),
+          elo: 1000,
         },
       ]);
     }
@@ -69,7 +73,11 @@ export default function Home() {
           `${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints?category=${category}&name=${lastfmUser}&period=${period}`
         )
         .then((response) => {
-          dispatch(addMultipleItems({ items: response.data }));
+          const items = response.data.map((item: Item) => ({
+            ...item,
+            elo: 1000,
+          }));
+          dispatch(addMultipleItems({ items: items }));
         })
         .catch((error) => {
           console.error(error);
@@ -88,7 +96,9 @@ export default function Home() {
           `${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints?category=${category}&name=${search}`
         )
         .then((response) => {
-          setSearchedItems(response.data);
+          setSearchedItems(
+            response.data.map((item: Item) => ({ ...item, elo: 1000 }))
+          );
         })
         .catch((error) => {
           console.error(error);
@@ -124,7 +134,7 @@ export default function Home() {
     index: number;
     origin: "add" | "collection" | "";
   }>({
-    item: { title: "", cover: "" },
+    item: { title: "", cover: "", elo: 0 },
     index: -1,
     origin: "",
   });
@@ -142,6 +152,7 @@ export default function Home() {
   const dispatch = useDispatch();
   const title = useSelector((state: State) => state.title);
   const showTitles = useSelector((state: State) => state.showTitles);
+  const showEloRating = useSelector((state: State) => state.showEloRating);
   const rows = useSelector((state: State) => state.rows);
   const columns = useSelector((state: State) => state.columns);
   const featured = useSelector((state: State) => state.featured);
@@ -171,8 +182,15 @@ export default function Home() {
   const textColor = useSelector((state: State) => state.textColor);
   const titlesPosition = useSelector((state: State) => state.titlesPosition);
   const items = useSelector((state: State) => state.items);
+  const sortedItems = useSelector((state: State) => state.sortedItems);
+  const battleItems = useSelector((state: State) => state.battleItems);
+  const numberBattleItems = useSelector(
+    (state: State) => state.numberBattleItems
+  );
+  const sort = useSelector((state: State) => state.sort);
+  const lockWinner = useSelector((state: State) => state.lockWinner);
   const [searchedItems, setSearchedItems] = useState<
-    { title: string; cover: string }[]
+    { title: string; cover: string; elo: 1000 }[]
   >([]);
   return (
     <>
@@ -208,7 +226,7 @@ export default function Home() {
                       src="/icons/add.svg"
                       alt={"Add"}
                     ></Image>
-                    Add items
+                    Add
                   </h2>
                 </div>
                 <div
@@ -226,6 +244,23 @@ export default function Home() {
                       alt="Settings"
                     ></Image>
                     Options
+                  </h2>
+                </div>
+                <div
+                  onClick={() => setTab("battle")}
+                  className={`${styles.tab} ${
+                    tab === "battle" && styles["selected-tab"]
+                  }`}
+                >
+                  <h2>
+                    <Image
+                      width={10}
+                      height={10}
+                      className={styles.icon}
+                      src="/icons/controller.svg"
+                      alt="Battle"
+                    ></Image>
+                    Battle
                   </h2>
                 </div>
                 <div
@@ -271,7 +306,9 @@ export default function Home() {
                 {tab === "options" && (
                   <OptionsTab
                     darkTheme={darkTheme}
+                    sort={sort}
                     showTitles={showTitles}
+                    showEloRating={showEloRating}
                     rows={rows}
                     columns={columns}
                     featured={featured}
@@ -297,45 +334,91 @@ export default function Home() {
                     title={title}
                   />
                 )}
+                {tab === "battle" && (
+                  <BattleTab
+                    dispatch={dispatch}
+                    showTitles={showTitles}
+                    font={font}
+                    fontSize={fontSize}
+                    numberBattleItems={numberBattleItems}
+                    lockWinner={lockWinner}
+                  />
+                )}
                 {tab === "about" && <AboutTab />}
               </div>
             </div>
           </div>
-          <Workspace
-            items={items}
-            draggingItem={draggingItem}
-            hoverItem={hoverItem}
-            onDrop={onDrop}
-            setHoverItem={setHoverItem}
-            setDraggingItem={setDraggingItem}
-            title={title}
-            setIsDownloading={setIsDownloading}
-            isDownloading={isDownloading}
-            showTitles={showTitles}
-            rows={rows}
-            columns={columns}
-            featured={featured}
-            backgroundType={backgroundType}
-            imageFilter={imageFilter}
-            backgroundColor1={backgroundColor1}
-            backgroundColor2={backgroundColor2}
-            backgroundOpacity={backgroundOpacity}
-            gradientDirection={gradientDirection}
-            gap={gap}
-            borderColor={borderColor}
-            isCircle={isCircle}
-            borderSize={borderSize}
-            borderRadius={borderRadius}
-            showNumbers={showNumbers}
-            showShadows={showShadows}
-            font={font}
-            fontSize={fontSize}
-            textColor={textColor}
-            titlesPosition={titlesPosition}
-            resetDrag={resetDrag}
-            dispatch={dispatch}
-            hasData={hasData}
-          />
+          {tab === "battle" ? (
+            <Battlespace
+              battleItems={battleItems}
+              lockWinner={lockWinner}
+              items={items}
+              title={title}
+              showTitles={showTitles}
+              rows={rows}
+              columns={columns}
+              featured={featured}
+              backgroundType={backgroundType}
+              imageFilter={imageFilter}
+              backgroundColor1={backgroundColor1}
+              backgroundColor2={backgroundColor2}
+              backgroundOpacity={backgroundOpacity}
+              gradientDirection={gradientDirection}
+              gap={gap}
+              borderColor={borderColor}
+              isCircle={isCircle}
+              borderSize={borderSize}
+              borderRadius={borderRadius}
+              showNumbers={showNumbers}
+              showShadows={showShadows}
+              font={font}
+              fontSize={fontSize}
+              textColor={textColor}
+              titlesPosition={titlesPosition}
+              dispatch={dispatch}
+              hasData={hasData}
+              numberBattleItems={numberBattleItems}
+            />
+          ) : (
+            <Workspace
+              items={items}
+              sortedItems={sortedItems}
+              sort={sort}
+              draggingItem={draggingItem}
+              hoverItem={hoverItem}
+              onDrop={onDrop}
+              setHoverItem={setHoverItem}
+              setDraggingItem={setDraggingItem}
+              title={title}
+              setIsDownloading={setIsDownloading}
+              isDownloading={isDownloading}
+              showTitles={showTitles}
+              showEloRating={showEloRating}
+              rows={rows}
+              columns={columns}
+              featured={featured}
+              backgroundType={backgroundType}
+              imageFilter={imageFilter}
+              backgroundColor1={backgroundColor1}
+              backgroundColor2={backgroundColor2}
+              backgroundOpacity={backgroundOpacity}
+              gradientDirection={gradientDirection}
+              gap={gap}
+              borderColor={borderColor}
+              isCircle={isCircle}
+              borderSize={borderSize}
+              borderRadius={borderRadius}
+              showNumbers={showNumbers}
+              showShadows={showShadows}
+              font={font}
+              fontSize={fontSize}
+              textColor={textColor}
+              titlesPosition={titlesPosition}
+              resetDrag={resetDrag}
+              dispatch={dispatch}
+              hasData={hasData}
+            />
+          )}
         </div>
       </main>
     </>

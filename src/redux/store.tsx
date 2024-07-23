@@ -6,6 +6,7 @@ import {
   ImageFilter,
   Item,
   Position,
+  Sort,
   State,
 } from "./state";
 import { persistReducer, persistStore } from "redux-persist";
@@ -13,7 +14,7 @@ import storage from "redux-persist/lib/storage";
 
 const itemArray = [];
 for (let i = 0; i < 105; ++i) {
-  itemArray.push({ title: "", cover: "" });
+  itemArray.push({ title: "", cover: "", elo: 0 });
 }
 
 const copy = (targetState: State, sourceState: State) => {
@@ -23,6 +24,7 @@ const copy = (targetState: State, sourceState: State) => {
   targetState.columns = sourceState.columns;
   targetState.featured = sourceState.featured;
   targetState.imageFilter = sourceState.imageFilter;
+  targetState.sort = sourceState.sort;
   targetState.backgroundType = sourceState.backgroundType;
   targetState.backgroundColor1 = sourceState.backgroundColor1;
   targetState.backgroundColor2 = sourceState.backgroundColor2;
@@ -34,6 +36,7 @@ const copy = (targetState: State, sourceState: State) => {
   targetState.borderSize = sourceState.borderSize;
   targetState.borderRadius = sourceState.borderRadius;
   targetState.showNumbers = sourceState.showNumbers;
+  targetState.showEloRating = sourceState.showEloRating;
   targetState.showShadows = sourceState.showShadows;
   targetState.font = sourceState.font;
   targetState.fontSize = sourceState.fontSize;
@@ -48,6 +51,8 @@ const initialState: State = {
   columns: 5,
   featured: 0,
   backgroundType: BackgroundType.color,
+  sort: Sort.default,
+  lockWinner: false,
   imageFilter: ImageFilter.normal,
   backgroundColor1: "#000000",
   backgroundColor2: "#000000",
@@ -59,12 +64,16 @@ const initialState: State = {
   borderSize: 0,
   borderRadius: 0,
   showNumbers: false,
+  showEloRating: false,
   showShadows: false,
   font: Font.monospace,
   fontSize: 10,
   textColor: "#ffffff",
   titlesPosition: Position.side,
   items: itemArray,
+  sortedItems: itemArray,
+  battleItems: [],
+  numberBattleItems: 2,
 };
 
 export const stateSlice = createSlice({
@@ -84,6 +93,26 @@ export const stateSlice = createSlice({
       state.columns = value.payload;
       // Set featured to 0 if columns change
       state.featured = 0;
+    },
+    setSort: (state, value: { payload: Sort }) => {
+      state.sort = value.payload;
+      switch (value.payload) {
+        case Sort.elo:
+          state.sortedItems = state.items.slice().sort((a, b) => b.elo - a.elo);
+          break;
+        case Sort.default:
+          state.sortedItems = state.items;
+          break;
+      }
+    },
+    setLockWinner: (state, value: { payload: boolean }) => {
+      state.lockWinner = value.payload;
+    },
+    setBattleItems: (state, value: { payload: number[] }) => {
+      state.battleItems = value.payload;
+    },
+    setNumberBattleItems: (state, value: { payload: number }) => {
+      state.numberBattleItems = value.payload;
     },
     setFeatured: (state, value: { payload: number }) => {
       state.featured = value.payload;
@@ -124,6 +153,9 @@ export const stateSlice = createSlice({
     setShowNumbers: (state, value: { payload: boolean }) => {
       state.showNumbers = value.payload;
     },
+    setShowEloRating: (state, value: { payload: boolean }) => {
+      state.showEloRating = value.payload;
+    },
     setShowShadows: (state, value: { payload: boolean }) => {
       state.showShadows = value.payload;
     },
@@ -145,8 +177,15 @@ export const stateSlice = createSlice({
     ) => {
       if (value.payload.destinationIndex === -1) {
         const firstIndex = state.items.findIndex((item) => !item.cover) ?? 0;
-        state.items[firstIndex] = value.payload.item;
-      } else state.items[value.payload.destinationIndex] = value.payload.item;
+        state.items[firstIndex] = {
+          ...value.payload.item,
+          elo: 1000,
+        };
+      } else
+        state.items[value.payload.destinationIndex] = {
+          ...value.payload.item,
+          elo: 1000,
+        };
     },
     addMultipleItems: (state, value: { payload: { items: Item[] } }) => {
       state.items = value.payload.items;
@@ -167,7 +206,37 @@ export const stateSlice = createSlice({
       state.items[value.payload.destinationIndex] = toMove;
     },
     removeItem: (state, value: { payload: number }) => {
-      state.items[value.payload] = { title: "", cover: "" };
+      state.items[value.payload] = { title: "", cover: "", elo: 0 };
+    },
+    updateElo: (
+      state,
+      value: { payload: { winner: number; losers: number[] } }
+    ) => {
+      const winnerItem = state.items[value.payload.winner];
+      const loserItems = value.payload.losers.map(
+        (index) => state.items[index]
+      );
+      const k = 32;
+      const expectedScores = loserItems.map(
+        (loser) => 1 / (1 + 10 ** ((loser.elo - winnerItem.elo) / 400))
+      );
+      const newElo =
+        winnerItem.elo + k * (1 - expectedScores.reduce((a, b) => a * b));
+      winnerItem.elo = Math.round(newElo);
+      loserItems.forEach((loser) => {
+        const newElo =
+          loser.elo - k * (1 - expectedScores.reduce((a, b) => a * b));
+        loser.elo = Math.round(newElo);
+      });
+
+      state.items[value.payload.winner] = winnerItem;
+      value.payload.losers.forEach(
+        (index, i) => (state.items[index] = loserItems[i])
+      );
+      // If sorting by elo, resort items
+      if (state.sort === Sort.elo) {
+        state.sortedItems = state.items.slice().sort((a, b) => b.elo - a.elo);
+      }
     },
     setPreset: (state, value: { payload: string }) => {
       switch (value.payload) {
@@ -177,6 +246,7 @@ export const stateSlice = createSlice({
           state.featured = 0;
           state.showTitles = true;
           state.backgroundType = BackgroundType.color;
+          state.imageFilter = ImageFilter.normal;
           state.backgroundColor1 = "#000000";
           state.backgroundOpacity = 16;
           state.gap = 20;
@@ -196,6 +266,7 @@ export const stateSlice = createSlice({
           state.featured = 0;
           state.showTitles = true;
           state.backgroundType = BackgroundType.gradient;
+          state.imageFilter = ImageFilter.normal;
           state.gradientDirection = Direction.topRight;
           state.backgroundColor1 = "#000000";
           state.backgroundColor2 = "#2c313a";
@@ -217,6 +288,7 @@ export const stateSlice = createSlice({
           state.featured = 10;
           state.showTitles = true;
           state.backgroundType = BackgroundType.color;
+          state.imageFilter = ImageFilter.normal;
           state.backgroundColor1 = "#000000";
           state.backgroundOpacity = 16;
           state.gap = 10;
@@ -234,6 +306,13 @@ export const stateSlice = createSlice({
     importState: (state, value: { payload: any }) => {
       const fromFile = JSON.parse(value.payload.target.result);
       copy(state, fromFile);
+      // Add elo to items if not present
+      state.items = state.items.map((item) => {
+        if (!item.elo) {
+          item.elo = 1000;
+        }
+        return item;
+      });
       state.items = fromFile.items;
     },
     exportState: (state) => {
@@ -253,7 +332,7 @@ export const stateSlice = createSlice({
     restart: (state) => {
       const itemArray = [];
       for (let i = 0; i < 105; ++i) {
-        itemArray.push({ title: "", cover: "" });
+        itemArray.push({ title: "", cover: "", elo: 0 });
       }
       copy(state, initialState);
       state.items = itemArray;
@@ -266,6 +345,9 @@ export const {
   setShowTitles,
   setRows,
   setColumns,
+  setBattleItems,
+  setNumberBattleItems,
+  setLockWinner,
   setFeatured,
   setImageFilter,
   setBackgroundType,
@@ -279,15 +361,18 @@ export const {
   setBorderSize,
   setBorderRadius,
   setShowNumbers,
+  setShowEloRating,
   setShowShadows,
   setFont,
   setFontSize,
   setTextColor,
   setTitlesPosition,
+  setSort,
   addItem,
   addMultipleItems,
   swapItem,
   removeItem,
+  updateElo,
   setPreset,
   exportState,
   importState,

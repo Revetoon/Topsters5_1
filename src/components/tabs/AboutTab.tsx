@@ -17,6 +17,7 @@ const AboutTab = () => {
           Some features I have added/finished:
           <ul>
             <li>- Import from last.fm</li>
+            <li>- Battle Mode</li>
             <li>- More customization options</li>
             <li>- Feature the top items in your list</li>
           </ul>

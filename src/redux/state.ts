@@ -5,6 +5,7 @@ export type State = {
   columns: number;
   featured: number;
   backgroundType: BackgroundType;
+  sort: Sort;
   imageFilter: ImageFilter;
   backgroundColor1: string;
   backgroundColor2: string;
@@ -16,18 +17,29 @@ export type State = {
   borderSize: number;
   borderRadius: number;
   showNumbers: boolean;
+  showEloRating: boolean;
   showShadows: boolean;
   font: Font | string;
   fontSize: number;
   textColor: string;
   titlesPosition: Position;
   items: Item[];
+  sortedItems: Item[];
+  battleItems: number[];
+  numberBattleItems: number;
+  lockWinner: boolean;
 };
 
 export enum BackgroundType {
   color = "Color",
   gradient = "Gradient",
   radialGradient = "Radial gradient",
+}
+
+export enum Sort {
+  // This is the custom sort order
+  default = "Default",
+  elo = "Elo Rating",
 }
 
 export enum ImageFilter {
@@ -84,4 +96,5 @@ export enum Period {
 export interface Item {
   title: string;
   cover: string;
+  elo: number;
 }
