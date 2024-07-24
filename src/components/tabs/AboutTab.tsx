@@ -20,6 +20,7 @@ const AboutTab = () => {
             <li>- Battle Mode</li>
             <li>- More customization options</li>
             <li>- Feature the top items in your list</li>
+            <li>- Support for multiple lists</li>
           </ul>
         </p>
         <h2>Data sources</h2>
