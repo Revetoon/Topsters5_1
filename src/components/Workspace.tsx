@@ -7,12 +7,14 @@ import {
   Item,
   Position,
   Sort,
+  State,
 } from "@/redux/state";
-import { removeItem } from "@/redux/store";
+import { createNewList, removeItem, selectList } from "@/redux/store";
 import styles from "@/styles/Home.module.css";
 import { UnknownAction } from "@reduxjs/toolkit";
 import Image from "next/image";
 import { Dispatch, SetStateAction } from "react";
+import Dropdown from "./Dropdown";
 
 const Workspace = ({
   isDownloading,
@@ -51,6 +53,7 @@ const Workspace = ({
   resetDrag,
   dispatch,
   hasData,
+  lists,
 }: {
   isDownloading: boolean;
   title: string;
@@ -96,6 +99,7 @@ const Workspace = ({
   resetDrag: () => void;
   dispatch: Dispatch<UnknownAction>;
   hasData: (item: Item) => boolean;
+  lists: State[];
 }) => {
   const maxItems = rows * columns + (featured !== columns ? featured : 0);
   const featuredSize = 200 + gap;
@@ -120,6 +124,22 @@ const Workspace = ({
         return "none";
     }
   };
+
+  const getOptions = () => {
+    const options = [];
+    options.push({ id: -1, name: !!title ? title : "Untitled" });
+    if (lists) {
+      for (let i = 0; i < lists.length; i++) {
+        options.push({
+          id: i,
+          name: !!lists[i].title ? lists[i].title : "Untitled",
+        });
+      }
+    }
+    options.push({ id: lists ? lists.length : 0, name: "New list" });
+    return options;
+  };
+
   return (
     <div className={styles.workspace}>
       <div
@@ -134,7 +154,20 @@ const Workspace = ({
               style={{ cursor: "unset" }}
               className={`${styles.tab} ${styles["selected-tab"]}`}
             >
-              <h2>{!!title ? title : "Untitled"}</h2>
+              {/* Dropdown to choose other lists */}
+              <Dropdown
+                options={getOptions()}
+                selected={-1}
+                onChange={(id) => {
+                  if (id === -1) {
+                    return;
+                  } else if (!lists || parseInt(id) === lists.length) {
+                    dispatch(createNewList());
+                  } else {
+                    dispatch(selectList(id));
+                  }
+                }}
+              />
             </div>
           </div>
           <div>

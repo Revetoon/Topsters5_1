@@ -1,5 +1,6 @@
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import {
+  AppState,
   BackgroundType,
   Direction,
   Font,
@@ -24,9 +25,9 @@ const copy = (targetState: State, sourceState: State) => {
   targetState.rows = sourceState.rows;
   targetState.columns = sourceState.columns;
   targetState.featured = sourceState.featured;
-  targetState.imageFilter = sourceState.imageFilter;
-  targetState.sort = sourceState.sort;
   targetState.backgroundType = sourceState.backgroundType;
+  targetState.sort = sourceState.sort;
+  targetState.imageFilter = sourceState.imageFilter;
   targetState.backgroundColor1 = sourceState.backgroundColor1;
   targetState.backgroundColor2 = sourceState.backgroundColor2;
   targetState.backgroundOpacity = sourceState.backgroundOpacity;
@@ -43,9 +44,18 @@ const copy = (targetState: State, sourceState: State) => {
   targetState.fontSize = sourceState.fontSize;
   targetState.textColor = sourceState.textColor;
   targetState.titlesPosition = sourceState.titlesPosition;
+  targetState.numberBattleItems = sourceState.numberBattleItems;
+  targetState.lockWinner = sourceState.lockWinner;
 };
 
-const initialState: State = {
+const copyItems = (targetState: State, sourceState: State) => {
+  targetState.items = sourceState.items;
+  targetState.sortedItems = sourceState.sortedItems;
+  targetState.battleItems = sourceState.battleItems;
+  targetState.sort = sourceState.sort;
+};
+
+const initialState: AppState = {
   title: "",
   showTitles: true,
   rows: 5,
@@ -75,6 +85,7 @@ const initialState: State = {
   sortedItems: itemArray,
   battleItems: [],
   numberBattleItems: 2,
+  lists: [],
 };
 
 export const stateSlice = createSlice({
@@ -371,6 +382,69 @@ export const stateSlice = createSlice({
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
     },
+    createNewList: (state) => {
+      let lists = state.lists;
+      if (!lists) {
+        lists = [];
+      }
+      let stateCopy = JSON.parse(JSON.stringify(state)); // Step 1: Deep copy
+      delete stateCopy.lists; // Step 2: Omit 'lists' by deleting it from the copy
+
+      copy(state, initialState);
+
+      lists.push(stateCopy);
+      state.lists = lists;
+      const itemArray = [];
+      for (let i = 0; i < maxItems; ++i) {
+        itemArray.push({ title: "", cover: "", elo: 0 });
+      }
+      state.items = itemArray;
+      state.sortedItems = itemArray;
+      state.battleItems = [];
+      state.sort = Sort.default;
+    },
+    selectList: (state, value: { payload: number }) => {
+      // Check if valid list
+      if (value.payload < 0 || value.payload >= state.lists.length) {
+        return;
+      }
+      // Swap current state with selected list
+      const current = JSON.parse(JSON.stringify(state));
+      delete current.lists;
+      const selected = JSON.parse(JSON.stringify(state.lists[value.payload]));
+      copy(state, selected);
+      copyItems(state, selected);
+      state.lists[value.payload] = current;
+    },
+    deleteList: (state, value: { payload?: number }) => {
+      // Delete the given list or if no payload, delete the current list
+      if (value.payload !== undefined) {
+        if (value.payload < 0 || value.payload >= state.lists.length) {
+          return;
+        }
+        state.lists.splice(value.payload, 1);
+      } else {
+        // Set the state to the first list in lists
+        if (state.lists.length > 0) {
+          const selected = JSON.parse(JSON.stringify(state.lists[0]));
+          copy(state, selected);
+          copyItems(state, selected);
+          // Remove the first list
+          state.lists.shift();
+        } else {
+          // Reset to initial state if no lists
+          const itemArray = [];
+          for (let i = 0; i < maxItems; ++i) {
+            itemArray.push({ title: "", cover: "", elo: 0 });
+          }
+          copy(state, initialState);
+          state.items = itemArray;
+          state.sortedItems = itemArray;
+          state.battleItems = [];
+          state.sort = Sort.default;
+        }
+      }
+    },
     restart: (state) => {
       const itemArray = [];
       for (let i = 0; i < maxItems; ++i) {
@@ -424,6 +498,9 @@ export const {
   restart,
   makeSortDefault,
   removeDuplicateItems,
+  createNewList,
+  selectList,
+  deleteList,
 } = stateSlice.actions;
 
 const persistConfig = {

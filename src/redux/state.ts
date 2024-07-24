@@ -23,11 +23,16 @@ export type State = {
   fontSize: number;
   textColor: string;
   titlesPosition: Position;
+  numberBattleItems: number;
+  lockWinner: boolean;
   items: Item[];
   sortedItems: Item[];
   battleItems: number[];
-  numberBattleItems: number;
-  lockWinner: boolean;
+};
+
+// Extending the original State with an additional 'lists' property to store multiple lists
+export type AppState = State & {
+  lists: State[];
 };
 
 export enum BackgroundType {

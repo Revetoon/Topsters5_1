@@ -1,4 +1,4 @@
-import { Category, Item, Period, State } from "@/redux/state";
+import { AppState, Category, Item, Period, State } from "@/redux/state";
 import {
   addItem,
   addMultipleItems,
@@ -211,6 +211,7 @@ export default function Home() {
   );
   const sort = useSelector((state: State) => state.sort);
   const lockWinner = useSelector((state: State) => state.lockWinner);
+  const lists = useSelector((state: AppState) => state.lists);
   const [searchedItems, setSearchedItems] = useState<
     { title: string; cover: string; elo: 1000 }[]
   >([]);
@@ -443,6 +444,7 @@ export default function Home() {
               resetDrag={resetDrag}
               dispatch={dispatch}
               hasData={hasData}
+              lists={lists}
             />
           )}
         </div>

@@ -38,6 +38,7 @@ import {
   setSort,
   makeSortDefault,
   removeDuplicateItems,
+  deleteList,
 } from "@/redux/store";
 import styles from "@/styles/Home.module.css";
 import Image from "next/image";
@@ -126,7 +127,7 @@ const OptionsTab = ({
         </div>
       </div>
       <div className={styles["input-group"]}>
-        <div style={{ height: "88px" }} className={styles.input}>
+        <div className={styles.input}>
           <label className={styles["input-label"]}>Data</label>
           <div className={styles.values}>
             <div
@@ -161,21 +162,46 @@ const OptionsTab = ({
               >
                 Export
               </Button>
+            </div>
+          </div>
+        </div>
+        <div style={{ height: "88px" }} className={styles.input}>
+          <label className={styles["input-label"]}>Clean</label>
+          <div className={styles.values}>
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                maxWidth: "100%",
+                overflow: "hidden",
+                flexWrap: "wrap",
+              }}
+            >
               <Button
                 onClick={() => {
                   confirm("Are you sure you want to remove all duplicates?") &&
                     dispatch(removeDuplicateItems());
                 }}
               >
-                Remove Dupes
+                No Dupes
               </Button>
               <Button
                 onClick={() => {
-                  confirm("Are you sure you want to start over?") &&
-                    dispatch(restart());
+                  confirm(
+                    "Are you sure you want to start over? This will clear the current list."
+                  ) && dispatch(restart());
                 }}
               >
-                Restart
+                Restart List
+              </Button>
+              <Button
+                onClick={() => {
+                  confirm(
+                    "Are you sure you want to delete the current list?"
+                  ) && dispatch(deleteList());
+                }}
+              >
+                Delete List
               </Button>
             </div>
           </div>
